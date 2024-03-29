@@ -5,48 +5,64 @@
 int main()
 {
 
-    // primero creamos el objeto para poder modificarlo con nuestras funciones pasando este objeto por referencia a las funciones
+    //Programa principal
 
-    fstream archivo;int longitud = 100;
+    int semilla,ejercicio;
 
-    //creamos un arreglo dinamico donde vamos a guardar los caracteres
 
+
+    cout<<"Ingrese que ejercicio desea ejecutar (1-2) : ";
+    cin>>ejercicio;
+
+    cout<<"Ingrese un la semilla : ";
+    cin>>semilla;
+
+    //cargamos lo que necesita la app para funcionar
+    fstream archivo;
+    int longitud = 100;
     char *caracteres = new char[longitud];
-
-    // obtenemos todos los caracteres del archivo
-
-    obtenerCaracteres(archivo, "prueba.txt", caracteres,longitud);
-
-    //transformamos los caracteres a binario.
-
-    // Creamos un arreglo dinámico para guardar los caracteres a binario
-    /*char **arregloEnBinario = new char*[longitud];
-    for (int i = 0; i < 100; ++i) {
-        arregloEnBinario[i] = new char[8];
-    }*/
-    cout<<longitud<<endl;
     char arregloEnBinario[longitud][9];
 
 
+    switch (ejercicio) {
+    case 1:
+        cout<<"Ejecutando el ejercicio 1";
 
-    decimalBinario(caracteres, arregloEnBinario,longitud);
+        obtenerCaracteres(archivo, "prueba.txt", caracteres,longitud);
+        decimalBinario(caracteres, arregloEnBinario,longitud);
 
+        codificacion(arregloEnBinario,longitud,semilla,"sudo.txt");
+        //funcion para imprimir la matriz original y la codificada;
+        break;
 
-    for (int i = 0; i<=longitud-1 ; i++) {
-        cout << "Caracter "<<caracteres[i]  << " en binario: ";
-        for (int j = 0; j < 8; j++) {
-            cout << arregloEnBinario[i][j];
-        }
-        cout << endl;
+    case 2:
+        cout<<"Aqui va el ejercicio2";
+        break;
+    default:
+        break;
     }
 
-    //liberamos memoria
 
-    delete[] caracteres;
-    /*for (int i = 0; i < longitud; ++i) {
-        delete[] arregloEnBinario[i];
-    }
-    delete[] arregloEnBinario;*/
+
+   delete[] caracteres;
+
+
+
+
+
+
+
+
+
+    //-------------------------------------------------------------//
+
+
+
+
+
+
+
+
 
 
 

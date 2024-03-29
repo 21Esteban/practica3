@@ -25,6 +25,10 @@ void cerrarArchivo(fstream &archivo)
     cout << "archivo cerrado correctamente" << endl;
 }
 
+
+
+
+
 // funcion para abrir un archivo obtener lo que tiene
 
 void obtenerCaracteres(fstream &archivo, const char *filename, char *array, int &longitud)
@@ -108,129 +112,107 @@ void decimalBinario(char *arreglo, char arregloAGuardar[][9], int longitud)
         }
     }
 
-    /*for(int l = 0 ; l<= longitud ; l++){
-         cout<<" primer bloque "<<" "<<"\n";
-         for(int m = 0 ; m<=7 ; m++){
-             cout<<arregloAGuardar[l][m];
-         }
-     }*/
 }
 
-int determinarBitsAInvertir(char bloque[], int semilla) {
-    int contadorUnos = 0, contadorCeros = 0;
-    for (int i = 0; i < semilla; i++) {
-        if (bloque[i] == '0') {
-            contadorCeros++;
-        } else {
-            contadorUnos++;
-        }
-    }
 
-    if (contadorUnos == contadorCeros) {
-        return 1; // Invertir todos los bits
-    } else if (contadorCeros > contadorUnos) {
-        return 2; // Invertir cada 2 bits
-    } else {
-        return 3; // Invertir cada 3 bits
-    }
-}
-
-void codificacion(char arregloEnBinario[][9], int longitud, int semilla) {
+void codificacion(char arregloEnBinario[][9], int longitud, int semilla,const char* filename) {
     int longitudDeMatrizAuxiliar = longitud * 8;
     char matrizAuxiliar[longitudDeMatrizAuxiliar];
-    int xd = 0;
-
-    // Convertir la matriz de binarios a una matriz unidimensional
-    for (int i = 0; i < longitud; i++) {
-        for (int j = 0; j < 8; j++) {
-            matrizAuxiliar[xd++] = arregloEnBinario[i][j];
-        }
-    }
-
+    convertirAMatrizUnidimensional(arregloEnBinario, longitud, matrizAuxiliar, longitudDeMatrizAuxiliar);
     // Calcular el número de bloques
     int numeroDeBloques = longitudDeMatrizAuxiliar / semilla;
-
     // Crear una matriz para almacenar los bloques
     char bloques[numeroDeBloques][semilla];
 
     // Llenar los bloques con los bits correspondientes
+
     int indiceAuxiliar = 0;
+
     for (int i = 0; i < numeroDeBloques; i++) {
         for (int j = 0; j < semilla; j++) {
             bloques[i][j] = matrizAuxiliar[indiceAuxiliar++];
         }
     }
 
-    int hola = 0;
     // Iniciar el proceso de codificación
     int contadorUnos = 0, contadorCeros = 0;
-    int contadorAnteriorUnos = 0 ; int contadorAnteriorCeros = 0 ;
+    int contadorAnteriorUnos = 0, contadorAnteriorCeros = 0;
     for (int i = 0; i < numeroDeBloques; i++) {
         contadorAnteriorUnos = contadorUnos;
         contadorAnteriorCeros = contadorCeros;
         contadorUnos = 0, contadorCeros = 0;
 
         // Contar los unos y ceros en el bloque actual
-
-            for (int j = 0; j < semilla; j++) {
-                if (bloques[i][j] == '1') {
-                    contadorUnos++;
-                } else {
-                    contadorCeros++;
-                }
+        for (int j = 0; j < semilla; j++) {
+            if (bloques[i][j] == '1') {
+                contadorUnos++;
+            } else {
+                contadorCeros++;
             }
-
-
+        }
 
         // Aplicar las reglas de codificación
-        int inversion = 0;
-        if (contadorAnteriorUnos == contadorAnteriorCeros ||i == 0) {
-            inversion = 1; // Invertir todos los bits
-        } else if (contadorAnteriorCeros > contadorAnteriorUnos) {
-            inversion = 2; // Invertir cada 2 bits
-        } else {
-            inversion = 3; // Invertir cada 3 bits
-        }
+        int inversion = reglaDeCodificacion(contadorAnteriorUnos,contadorAnteriorCeros,i);
 
         // Realizar la inversión según la regla determinada
-        for (int j = 0; j < semilla; j++) {
-            if ((inversion == 1) || ((inversion == 2) && (j%2!=0) && (j % 1 == 0)) || ((inversion == 3) && (j % 2 == 0))) {
-                if (bloques[i][j] == '0') {
-                    bloques[i][j] = '1';
-                } else {
-                    bloques[i][j] = '0';
-                }
-            }
-        }
-
-        // Reiniciar los contadores para el siguiente bloque
-
+        aplicarInversion(bloques[i], semilla, inversion);
     }
 
-    // Imprimir el archivo codificado
+    //ahora metemos lo codificado en un archivo en binario.
+    // Abre el archivo en modo binario
+    fstream archivo(filename, ios::out | ios::binary);
+
+    // Verifica si el archivo se abrió correctamente
+    if (!archivo) {
+        cerr << "Error al abrir el archivo." << endl;
+        return;
+    }
+
+    // Escribe los datos en el archivo binario
     for (int i = 0; i < numeroDeBloques; i++) {
-        for (int j = 0; j < semilla; j++) {
-            cout << bloques[i][j];
-        }
+        archivo.write(bloques[i], semilla);
     }
-    cout << endl;
+
+    // Cierra el archivo
+    archivo.close();
+
+    cout << "Datos escritos en el archivo binario correctamente en el archivo sudo.txt." << endl;
 }
 
+void convertirAMatrizUnidimensional(char arregloEnBinario[][9], int longitud, char matrizAuxiliar[], int& longitudDeMatrizAuxiliar) {
+    int xd = 0;
+    for (int i = 0; i < longitud; i++) {
+        for (int j = 0; j < 8; j++) {
+            matrizAuxiliar[xd++] = arregloEnBinario[i][j];
+        }
+    }
+    longitudDeMatrizAuxiliar = xd;
+}
 
+void aplicarInversion(char bloque[], int semilla, int inversion) {
+    for (int j = 0; j < semilla; j++) {
+        if ((inversion == 1) || ((inversion == 2) && (j % 2 != 0) && (j % 1 == 0)) || ((inversion == 3) && (j % 2 == 0))) {
+            if (bloque[j] == '0') {
+                bloque[j] = '1';
+            } else {
+                bloque[j] = '0';
+            }
+        }
+    }
+}
 
+int reglaDeCodificacion(int contadorAnteriorUnos,int contadorAnteriorCeros,int i){
+    int inversion = 0;
+    if (contadorAnteriorUnos == contadorAnteriorCeros || i == 0) {
+        inversion = 1; // Invertir todos los bits
+    } else if (contadorAnteriorCeros > contadorAnteriorUnos) {
+        inversion = 2; // Invertir cada 2 bits
+    } else {
+        inversion = 3; // Invertir cada 3 bits
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    return inversion;
+}
 
 
 
